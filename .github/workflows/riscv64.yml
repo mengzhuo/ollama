@@ -1,0 +1,32 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Build RISC-V ollama
+on:
+  push:
+    branches: [ "riscv64" ]
+jobs:
+  build:
+    runs-on:
+      - riscv-builders
+      - soc-spacemit-k1
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.22'
+    - name: Set Version
+      shell: bash
+      run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
+    - name: generate
+      run: go generate ./...
+    - name: Build
+      run: go build -v .
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v3.2.1-node20
+      with:
+        name: ollama-riscv64-rva20.exe
+        path: ollama
